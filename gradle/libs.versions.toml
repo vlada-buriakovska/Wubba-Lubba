@@ -17,11 +17,13 @@ composeBom = "2025.08.01"
 hilt = "2.57.1"
 ksp = "2.2.10-2.0.2"
 loggingInterceptor = "5.1.0"
+material = "1.9.1"
 navigationCompose = "2.9.4"
 retrofit = "3.0.0"
 serialization = "2.2.20"
 
 [libraries]
+androidx-compose-material = { module = "androidx.compose.material:material", version.ref = "material" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
