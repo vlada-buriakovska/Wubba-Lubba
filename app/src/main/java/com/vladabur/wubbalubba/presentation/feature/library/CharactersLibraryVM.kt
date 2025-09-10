@@ -23,6 +23,11 @@ class CharactersLibraryVM @Inject constructor(
 ) :
     BaseViewModel() {
 
+    companion object {
+        const val DEFAULT_LIST_PAGE_SIZE = 20
+        private const val FIRST_PAGE_INDEX = 0
+    }
+
     private val managerUiState = MutableStateFlow(CharactersLibraryUiState())
     val uiState: StateFlow<CharactersLibraryUiState> = managerUiState.asStateFlow()
 
@@ -39,22 +44,46 @@ class CharactersLibraryVM @Inject constructor(
             }
 
             Refresh -> {
-                getCharacters()
+                getCharacters(isRefreshing = true)
             }
         }
     }
 
-    fun getCharacters(page: Int = 0) {
+    private fun getCharacters(page: Int = FIRST_PAGE_INDEX, isRefreshing: Boolean = false) {
         getCharactersUseCase(
             coroutineScope = viewModelScope,
             params = Params(page = page),
             result = ResultCallbacks(
                 onSuccess = { result ->
+                    val newList = if (page == FIRST_PAGE_INDEX || isRefreshing) {
+                        result.characters
+                    } else {
+                        val finalList =
+                            managerUiState.value.charactersList?.plus(
+                                result.characters ?: emptyList()
+                            )
+                        finalList
+                    }
                     managerUiState.update {
-                        it.copy(charactersList = result)
+                        it.copy(
+                            charactersListTotal = result.total,
+                            charactersList = newList
+                        )
                     }
                 },
-                onLoading = ::handleOnLoading,
+                onLoading = { isLoading ->
+                    if (isRefreshing) {
+                        managerUiState.update {
+                            it.copy(isRefreshing = isLoading)
+                        }
+                    } else if (page == 0) {
+                        handleOnLoading(isLoading)
+                    } else {
+                        managerUiState.update {
+                            it.copy(isLoadingMore = isLoading)
+                        }
+                    }
+                },
                 onError = ::handleOnError,
                 onConnectionError = {
                     handleOnConnectionError { getCharacters(page) }
@@ -72,5 +101,8 @@ sealed class CharactersLibraryUiEvent {
 }
 
 data class CharactersLibraryUiState(
-    val charactersList: List<Character>? = null
+    val charactersListTotal: Int? = null,
+    val charactersList: List<Character>? = null,
+    val isRefreshing: Boolean? = null,
+    val isLoadingMore: Boolean? = null,
 )
