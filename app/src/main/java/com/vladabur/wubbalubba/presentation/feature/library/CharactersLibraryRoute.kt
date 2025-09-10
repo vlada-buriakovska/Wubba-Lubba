@@ -88,14 +88,13 @@ fun CharacterListItem(character: Character, onClick: () -> Unit) {
             character.name?.let {
                 Text(
                     text = it,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
+                    style = MaterialTheme.typography.headlineSmall
                 )
             }
             character.species?.let {
                 Text(
                     text = it,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
