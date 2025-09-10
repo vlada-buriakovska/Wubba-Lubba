@@ -1,4 +1,4 @@
-package com.vladabur.wubbalubba.ui.app
+package com.vladabur.wubbalubba.presentation.app
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
