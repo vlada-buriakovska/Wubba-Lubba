@@ -1,4 +1,4 @@
-package com.vladabur.wubbalubba.ui.theme
+package com.vladabur.wubbalubba.presentation.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
