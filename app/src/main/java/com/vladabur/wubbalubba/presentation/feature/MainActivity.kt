@@ -30,28 +30,16 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     content = { innerPadding ->
-                        Box(modifier = Modifier.padding(innerPadding)) {
+                        Box(
+                            modifier = Modifier.padding(
+                                bottom = innerPadding.calculateBottomPadding()
+                            )
+                        ) {
                             MainNavHost(navController)
                         }
                     }
                 )
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    WubbaLubbaTheme {
-        Greeting("Android")
     }
 }
