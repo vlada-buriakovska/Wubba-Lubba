@@ -6,7 +6,7 @@ import com.vladabur.wubbalubba.domain.models.CharactersList
 import com.vladabur.wubbalubba.domain.usecases.GetCharactersUseCase
 import com.vladabur.wubbalubba.domain.usecases.GetCharactersUseCase.Params
 import com.vladabur.wubbalubba.domain.usecases.base.ResultCallbacks
-import com.vladabur.wubbalubba.presentation.common.BaseViewModel
+import com.vladabur.wubbalubba.presentation.common.base.BaseViewModel
 import com.vladabur.wubbalubba.presentation.feature.library.CharactersLibraryUiEvent.Consume
 import com.vladabur.wubbalubba.presentation.feature.library.CharactersLibraryUiEvent.LoadMore
 import com.vladabur.wubbalubba.presentation.feature.library.CharactersLibraryUiEvent.OnSearchQueryChanged
@@ -33,7 +33,7 @@ class CharactersLibraryVM @Inject constructor(
         const val DEFAULT_LIST_PAGE_SIZE = 20
         const val FIRST_PAGE_INDEX = 0
         const val EMPTY_LIST_ERROR = "There is nothing here"
-        private const val SEARCH_DEBOUNCE_TIME_IN_MILLIS = 300L
+        private const val SEARCH_DEBOUNCE_TIME_IN_MILLIS = 500L
     }
 
     private val managerUiState = MutableStateFlow(CharactersLibraryUiState())

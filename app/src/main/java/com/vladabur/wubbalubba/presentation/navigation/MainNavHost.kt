@@ -8,6 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
+import com.vladabur.wubbalubba.presentation.feature.character.CharacterDetailsRoute
 import com.vladabur.wubbalubba.presentation.feature.library.CharactersLibraryRoute
 import com.vladabur.wubbalubba.presentation.navigation.graphs.MainNavGraph
 
@@ -21,11 +23,21 @@ fun MainNavHost(navHostController: NavHostController) {
     ) {
         composable<MainNavGraph.CharactersLibrary>(
             enterTransition = { fadeIn() + scaleIn() },
-            exitTransition = { fadeOut() + scaleOut() }
-        ) {
-            CharactersLibraryRoute {
-                //TODO
+            exitTransition = { fadeOut() + scaleOut() }) { backStackEntry ->
+            CharactersLibraryRoute { character ->
+                navHostController.navigate(MainNavGraph.CharacterDetails(characterId = character.id))
             }
+        }
+        composable<MainNavGraph.CharacterDetails>(
+            enterTransition = { fadeIn() + scaleIn() },
+            exitTransition = { fadeOut() + scaleOut() }) { backStackEntry ->
+            val characterId = backStackEntry.toRoute<MainNavGraph.CharacterDetails>().characterId
+            CharacterDetailsRoute(
+                characterId = characterId,
+                onUpClicked = {
+                    navHostController.navigateUp()
+                }
+            )
         }
     }
 }

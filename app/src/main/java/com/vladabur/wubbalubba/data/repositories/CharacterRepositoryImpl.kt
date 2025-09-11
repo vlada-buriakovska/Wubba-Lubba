@@ -1,8 +1,10 @@
 package com.vladabur.wubbalubba.data.repositories
 
 import com.vladabur.wubbalubba.data.extensions.mapToApiErrors
+import com.vladabur.wubbalubba.data.network.models.CharacterResponse
 import com.vladabur.wubbalubba.data.network.models.CharactersListResponse
 import com.vladabur.wubbalubba.data.network.services.CharacterService
+import com.vladabur.wubbalubba.domain.models.Character
 import com.vladabur.wubbalubba.domain.models.CharactersList
 import com.vladabur.wubbalubba.domain.repositories.CharacterRepository
 import javax.inject.Inject
@@ -15,6 +17,15 @@ class CharacterRepositoryImpl @Inject constructor(private val characterService: 
         return try {
             val response = characterService.getCharacters(page, name)
             CharactersListResponse.map(response)
+        } catch (e: Exception) {
+            throw e.mapToApiErrors()
+        }
+    }
+
+    override suspend fun getCharacter(id: Int): Character {
+        return try {
+            val response = characterService.getCharacter(id)
+            CharacterResponse.map(response)
         } catch (e: Exception) {
             throw e.mapToApiErrors()
         }

@@ -1,4 +1,4 @@
-package com.vladabur.wubbalubba.presentation.common
+package com.vladabur.wubbalubba.presentation.common.base
 
 import androidx.lifecycle.ViewModel
 import com.vladabur.wubbalubba.domain.models.exceptions.BaseException
