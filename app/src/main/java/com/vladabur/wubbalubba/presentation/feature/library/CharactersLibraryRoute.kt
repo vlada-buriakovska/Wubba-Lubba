@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -70,6 +71,7 @@ fun CharactersLibraryScreen(
     onCharacterClicked: ((Character) -> Unit)
 ) {
     val lazyListState = rememberLazyListState()
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Column {
         SearchBar(
@@ -83,7 +85,10 @@ fun CharactersLibraryScreen(
                     onQueryChange = {
                         onEvent(OnSearchQueryChanged(searchQuery = it))
                     },
-                    onSearch = { },
+                    onSearch = {
+                        keyboardController?.hide()
+                        onEvent(OnSearchQueryChanged(searchQuery = it))
+                    },
                     expanded = false,
                     onExpandedChange = {},
                     placeholder = { Text(stringResource(R.string.all_search)) },
@@ -96,7 +101,8 @@ fun CharactersLibraryScreen(
             },
             expanded = false,
             onExpandedChange = {},
-            content = {})
+            content = {},
+        )
         Box(modifier = Modifier.fillMaxSize()) {
             val isListEmpty = uiState.charactersList?.isEmpty() == true
             this@Column.AnimatedVisibility(isListEmpty && !baseUiState.isLoading) {

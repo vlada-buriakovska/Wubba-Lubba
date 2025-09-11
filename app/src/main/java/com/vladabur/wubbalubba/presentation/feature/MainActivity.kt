@@ -8,10 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.vladabur.wubbalubba.presentation.navigation.MainNavHost
 import com.vladabur.wubbalubba.presentation.ui.theme.WubbaLubbaTheme
@@ -31,9 +28,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     content = { innerPadding ->
                         Box(
-                            modifier = Modifier.padding(
-                                bottom = innerPadding.calculateBottomPadding()
-                            )
+                            modifier = Modifier.padding(innerPadding)
                         ) {
                             MainNavHost(navController)
                         }
