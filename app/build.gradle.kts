@@ -23,7 +23,17 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+    signingConfigs {
+        val properties = Properties()
+        properties.load(project.rootProject.file("secret.properties").inputStream())
 
+        create("release") {
+            storeFile = file(properties.getProperty("RELEASE_STORE_FILE"))
+            storePassword = properties.getProperty("RELEASE_STORE_PASSWORD")
+            keyAlias = properties.getProperty("RELEASE_KEY_ALIAS")
+            keyPassword = properties.getProperty("RELEASE_KEY_PASSWORD")
+        }
+    }
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -31,6 +41,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     flavorDimensions.add("main")
@@ -38,17 +49,6 @@ android {
         create("prod") {
             dimension = "main"
             buildConfigField("String", "BASE_URL", "\"https://rickandmortyapi.com/api/\"")
-        }
-    }
-    signingConfigs {
-        val properties = Properties()
-        properties.load(project.rootProject.file("secret.properties").inputStream())
-        
-        create("release") {
-            storeFile = file(properties.getProperty("RELEASE_STORE_FILE"))
-            storePassword = properties.getProperty("RELEASE_STORE_PASSWORD")
-            keyAlias = properties.getProperty("RELEASE_KEY_ALIAS")
-            keyPassword = properties.getProperty("RELEASE_KEY_PASSWORD")
         }
     }
     compileOptions {

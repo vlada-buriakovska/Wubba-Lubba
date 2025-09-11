@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -43,6 +44,7 @@ class CharactersLibraryVM @Inject constructor(
     init {
         _searchQuery
             .debounce(SEARCH_DEBOUNCE_TIME_IN_MILLIS)
+            .distinctUntilChanged()
             .onEach { query ->
                 getCharacters(name = query)
             }
