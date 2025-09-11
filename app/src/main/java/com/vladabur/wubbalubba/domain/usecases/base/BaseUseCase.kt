@@ -45,7 +45,7 @@ class ResultCallbacks<T>(
     val onSuccess: ((T) -> Unit)? = null,
     val onLoading: ((Boolean) -> Unit)? = null,
     val onError: ((BaseException) -> Unit)? = null,
-    val onConnectionError: ((BaseException) -> Unit)? = null
+    val onConnectionError: ((BaseException) -> Unit)? = null,
     val onUnexpectedError: ((Throwable) -> Unit)? = null,
 )
 
