@@ -1,5 +1,7 @@
 package com.vladabur.wubbalubba.domain.usecases.base
 
+import com.vladabur.wubbalubba.domain.models.exceptions.ApiErrorException
+import com.vladabur.wubbalubba.domain.models.exceptions.BaseException
 import com.vladabur.wubbalubba.domain.models.exceptions.ConnectionErrorException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +28,8 @@ abstract class BaseUseCase<PARAMS, RESULT> {
                 } catch (e: Exception) {
                     when (e) {
                         is ConnectionErrorException -> result.onConnectionError?.invoke(e)
-                        else -> result.onError?.invoke(e)
+                        is ApiErrorException -> result.onError?.invoke(e)
+                        else -> result.onUnexpectedError?.invoke(e)
                     }
                 } finally {
                     result.onLoading?.invoke(false)
@@ -41,7 +44,8 @@ abstract class BaseUseCase<PARAMS, RESULT> {
 class ResultCallbacks<T>(
     val onSuccess: ((T) -> Unit)? = null,
     val onLoading: ((Boolean) -> Unit)? = null,
-    val onError: ((Exception) -> Unit)? = null,
-    val onConnectionError: ((Exception) -> Unit)? = null
+    val onError: ((BaseException) -> Unit)? = null,
+    val onConnectionError: ((BaseException) -> Unit)? = null
+    val onUnexpectedError: ((Throwable) -> Unit)? = null,
 )
 
