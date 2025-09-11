@@ -1,6 +1,5 @@
 package com.vladabur.wubbalubba.domain.usecases
 
-import com.vladabur.wubbalubba.domain.models.Character
 import com.vladabur.wubbalubba.domain.models.CharactersList
 import com.vladabur.wubbalubba.domain.repositories.CharacterRepository
 import com.vladabur.wubbalubba.domain.usecases.base.BaseUseCase
@@ -16,11 +15,12 @@ class GetCharactersUseCase @Inject constructor(private val characterRepository: 
     override suspend fun remoteWork(params: Params?): CharactersList {
         return withContext(Dispatchers.IO) {
             delay(1000)
-            characterRepository.getCharactersList(params!!.page)
+            characterRepository.getCharactersList(params!!.page, params.name)
         }
     }
 
     class Params(
-        val page: Int
+        val page: Int,
+        val name: String? = null
     )
 }

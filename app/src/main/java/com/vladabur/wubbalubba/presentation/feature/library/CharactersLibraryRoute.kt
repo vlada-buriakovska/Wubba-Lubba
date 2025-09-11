@@ -13,8 +13,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -45,6 +51,7 @@ fun CharactersLibraryRoute(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CharactersLibraryScreen(
     uiState: CharactersLibraryUiState,
@@ -53,37 +60,68 @@ fun CharactersLibraryScreen(
     onCharacterClicked: ((Character) -> Unit)
 ) {
     val lazyListState = rememberLazyListState()
-    Box(modifier = Modifier.fillMaxSize()) {
-        PaginatedLazyColumn(
-            listState = lazyListState,
-            items = uiState.charactersList ?: emptyList(),
-            itemKey = {
-                it.id
-            },
-            isLoading = uiState.isLoadingMore == true,
-            isRefreshing = uiState.isRefreshing == true,
-            pageSize = DEFAULT_LIST_PAGE_SIZE,
-            total = uiState.charactersListTotal ?: 0,
-            onLoadMore = { page ->
-                onEvent.invoke(CharactersLibraryUiEvent.LoadMore(page))
-            },
-            onRefresh = {
-                onEvent.invoke(CharactersLibraryUiEvent.Refresh)
-            },
-        ) { character ->
-            CharacterListItem(character) {
-                onCharacterClicked(character)
-            }
-        }
-        if (baseUiState.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    color = LightPrimaryRed
+
+    Column {
+        SearchBar(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+            inputField = {
+                SearchBarDefaults.InputField(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    query = uiState.searchQuery ?: String(),
+                    onQueryChange = {
+                        onEvent(CharactersLibraryUiEvent.OnSearchQueryChanged(searchQuery = it))
+                    },
+                    onSearch = { },
+                    expanded = false,
+                    onExpandedChange = {},
+                    placeholder = { Text("Search...") },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = null
+                        )
+                    },
                 )
+            },
+            expanded = false,
+            onExpandedChange = {},
+            content = {}
+        )
+        Box(modifier = Modifier.fillMaxSize()) {
+            PaginatedLazyColumn(
+                listState = lazyListState,
+                items = uiState.charactersList ?: emptyList(),
+                itemKey = {
+                    it.id
+                },
+                isLoading = uiState.isLoadingMore == true,
+                isRefreshing = uiState.isRefreshing == true,
+                pageSize = DEFAULT_LIST_PAGE_SIZE,
+                total = uiState.charactersListTotal ?: 0,
+                onLoadMore = { page ->
+                    onEvent.invoke(CharactersLibraryUiEvent.LoadMore(page))
+                },
+                onRefresh = {
+                    onEvent.invoke(CharactersLibraryUiEvent.Refresh)
+                },
+            ) { character ->
+                CharacterListItem(character) {
+                    onCharacterClicked(character)
+                }
+            }
+            if (baseUiState.isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        color = LightPrimaryRed
+                    )
+                }
             }
         }
     }

@@ -10,6 +10,8 @@ interface CharacterService {
     @GET("character")
     suspend fun getCharacters(
         @Query("page")
-        page: Int
+        page: Int,
+        @Query("name")
+        name: String?,
     ): CharactersListResponse
 }

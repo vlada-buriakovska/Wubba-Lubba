@@ -1,6 +1,7 @@
 package com.vladabur.wubbalubba.presentation.common
 
 import androidx.lifecycle.ViewModel
+import com.vladabur.wubbalubba.domain.models.exceptions.BaseException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,10 +33,10 @@ open class BaseViewModel : ViewModel() {
         }
     }
 
-    protected fun handleOnError(error: Exception) {
+    protected fun handleOnError(error: BaseException) {
         error.printStackTrace()
         managerBaseState.update {
-            it.copy(error = error.localizedMessage)
+            it.copy(error = error.error)
         }
     }
 
@@ -46,7 +47,15 @@ open class BaseViewModel : ViewModel() {
         }
     }
 
-    protected fun consumeConnectionError() {
+
+    protected open fun handleOnUnexpectedError(e: Throwable) {
+        e.printStackTrace()
+        managerBaseState.update {
+            it.copy(unexpectedError = e.localizedMessage)
+        }
+    }
+
+    private fun consumeConnectionError() {
         managerBaseState.update {
             it.copy(isConnectionError = null)
         }
