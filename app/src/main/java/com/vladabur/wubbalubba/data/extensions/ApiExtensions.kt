@@ -16,8 +16,6 @@ fun Exception.mapToApiErrors(): Throwable {
         is HttpException -> {
             return if (this.code() == 500) {
                 ApiErrorException(apiError = ApiError(error = "Woops! Something happened with server"))
-            } else if (this.code() == 404) {
-                ConnectionErrorException()
             } else {
                 val errorResponse =
                     Gson().fromJson(
