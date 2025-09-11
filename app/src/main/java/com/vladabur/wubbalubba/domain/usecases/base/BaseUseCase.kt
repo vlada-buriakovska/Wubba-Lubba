@@ -1,5 +1,6 @@
 package com.vladabur.wubbalubba.domain.usecases.base
 
+import com.vladabur.wubbalubba.domain.models.exceptions.ConnectionErrorException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -24,11 +25,7 @@ abstract class BaseUseCase<PARAMS, RESULT> {
                     result.onSuccess?.invoke(resultOfWork)
                 } catch (e: Exception) {
                     when (e) {
-                        is UnknownHostException,
-                        is SocketTimeoutException,
-                        is ConnectException,
-                        is TimeoutException -> result.onConnectionError?.invoke(e)
-
+                        is ConnectionErrorException -> result.onConnectionError?.invoke(e)
                         else -> result.onError?.invoke(e)
                     }
                 } finally {
