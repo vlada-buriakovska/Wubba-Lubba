@@ -6,4 +6,7 @@ import kotlinx.serialization.Serializable
 sealed class MainNavGraph {
     @Serializable
     data object CharactersLibrary : MainNavGraph()
+
+    @Serializable
+    data class CharacterDetails(val characterId: Int) : MainNavGraph()
 }

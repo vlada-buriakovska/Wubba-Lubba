@@ -1,7 +1,7 @@
 package com.vladabur.wubbalubba.presentation.feature.library
 
 import PaginatedLazyColumn
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,7 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.vladabur.wubbalubba.R
 import com.vladabur.wubbalubba.domain.models.Character
-import com.vladabur.wubbalubba.presentation.common.BaseUiState
+import com.vladabur.wubbalubba.presentation.common.base.BaseUiState
 import com.vladabur.wubbalubba.presentation.extensions.shimmerEffect
 import com.vladabur.wubbalubba.presentation.feature.library.CharactersLibraryUiEvent.LoadMore
 import com.vladabur.wubbalubba.presentation.feature.library.CharactersLibraryUiEvent.OnSearchQueryChanged
@@ -50,7 +50,8 @@ import com.vladabur.wubbalubba.presentation.ui.theme.AppTypography
 
 @Composable
 fun CharactersLibraryRoute(
-    viewModel: CharactersLibraryVM = hiltViewModel(), onCharacterClicked: ((Character) -> Unit)
+    viewModel: CharactersLibraryVM = hiltViewModel(),
+    onCharacterClicked: ((Character) -> Unit)
 ) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val baseState = viewModel.baseUiState.collectAsStateWithLifecycle()
@@ -99,42 +100,47 @@ fun CharactersLibraryScreen(
                     },
                 )
             },
+            colors = SearchBarDefaults.colors(containerColor = MaterialTheme.colorScheme.surface),
             expanded = false,
             onExpandedChange = {},
             content = {},
         )
         Box(modifier = Modifier.fillMaxSize()) {
             val isListEmpty = uiState.charactersList?.isEmpty() == true
-            this@Column.AnimatedVisibility(isListEmpty && !baseUiState.isLoading) {
-                EmptyListPlaceholder()
-            }
-            this@Column.AnimatedVisibility(!isListEmpty || baseUiState.isLoading) {
-                PaginatedLazyColumn(
-                    listState = lazyListState,
-                    items = uiState.charactersList ?: emptyList(),
-                    itemKey = {
-                        it.id
-                    },
-                    isLoading = baseUiState.isLoading,
-                    isLoadingMore = uiState.isLoadingMore == true,
-                    isRefreshing = uiState.isRefreshing == true,
-                    pageSize = DEFAULT_LIST_PAGE_SIZE,
-                    total = uiState.charactersListTotal ?: 0,
-                    onLoadMore = { page ->
-                        onEvent.invoke(LoadMore(page))
-                    },
-                    onRefresh = {
-                        onEvent.invoke(Refresh)
-                    },
-                    content = { character ->
-                        CharacterListItem(character) {
-                            onCharacterClicked(character)
+            val shouldShowEmptyListPlaceHolder = isListEmpty && baseUiState.isLoading == false
+            Crossfade(
+                targetState = shouldShowEmptyListPlaceHolder,
+            ) {
+                if (it) {
+                    EmptyListPlaceholder()
+                } else {
+                    PaginatedLazyColumn(
+                        listState = lazyListState,
+                        items = uiState.charactersList ?: emptyList(),
+                        itemKey = { item ->
+                            item.id
+                        },
+                        isLoading = baseUiState.isLoading == true,
+                        isLoadingMore = uiState.isLoadingMore == true,
+                        isRefreshing = uiState.isRefreshing == true,
+                        pageSize = DEFAULT_LIST_PAGE_SIZE,
+                        total = uiState.charactersListTotal ?: 0,
+                        onLoadMore = { page ->
+                            onEvent.invoke(LoadMore(page))
+                        },
+                        onRefresh = {
+                            onEvent.invoke(Refresh)
+                        },
+                        content = { character ->
+                            CharacterListItem(character) {
+                                onCharacterClicked(character)
+                            }
+                        },
+                        placeHolder = {
+                            CharacterListItemPlaceholder()
                         }
-                    },
-                    placeHolder = {
-                        CharacterListItemPlaceholder()
-                    }
-                )
+                    )
+                }
             }
         }
     }

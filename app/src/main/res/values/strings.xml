@@ -1,6 +1,13 @@
 <resources>
     <string name="app_name">Wubba Lubba</string>
     <string name="all_search">Search…</string>
+    <string name="all_back">Back</string>
+    
     <string name="empty_list_image_description">Empty list</string>
     <string name="empty_list_description">There is no one by this name</string>
+    
+    <string name="character_details_title">Details</string>
+    <string name="character_details_episodes_title">Episodes</string>
+    <string name="character_details_origin_title">Origin</string>
+    <string name="character_details_location_title">Location</string>
 </resources>
