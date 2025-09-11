@@ -7,7 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.vladabur.wubbalubba.BuildConfig
 import com.vladabur.wubbalubba.domain.models.Character
 import com.vladabur.wubbalubba.presentation.common.preview.CharacterPreviewProvider
 import com.vladabur.wubbalubba.presentation.ui.components.Chip
@@ -17,16 +16,16 @@ import com.vladabur.wubbalubba.presentation.ui.components.NonlazyGrid
 fun EpisodesTabContent(character: Character) {
     NonlazyGrid(
         columns = 6,
-        itemCount = character.episode?.size ?: 0,
+        itemCount = character.episodes?.size ?: 0,
         gap = 8.dp,
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
     ) {
-        character.episode?.get(it)?.let { episode ->
+        character.episodes?.get(it)?.let { episode ->
             Chip(
                 modifier = Modifier.fillMaxWidth(),
-                label = episode.removePrefix(BuildConfig.BASE_URL + "episode/")
+                label = episode
             )
         }
     }

@@ -1,5 +1,6 @@
 package com.vladabur.wubbalubba.domain.models
 
+import com.vladabur.wubbalubba.BuildConfig
 import java.util.Date
 
 data class Character(
@@ -12,6 +13,13 @@ data class Character(
     val origin: Location?,
     val location: Location?,
     val image: String?,
-    val episode: List<String>?,
-    val created: Date?
-)
+    val created: Date?,
+    private val episode: List<String>?,
+) {
+    companion object {
+        private const val EPISODES_ENDPOINT = "episode/"
+    }
+
+    val episodes: List<String>? =
+        episode?.map { it.removePrefix(BuildConfig.BASE_URL + EPISODES_ENDPOINT) }
+}

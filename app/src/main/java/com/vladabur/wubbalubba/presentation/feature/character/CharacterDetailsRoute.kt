@@ -43,6 +43,7 @@ import com.vladabur.wubbalubba.R
 import com.vladabur.wubbalubba.domain.models.Character
 import com.vladabur.wubbalubba.presentation.common.base.BaseUiState
 import com.vladabur.wubbalubba.presentation.common.preview.CharacterPreviewProvider
+import com.vladabur.wubbalubba.presentation.extensions.getFullDate
 import com.vladabur.wubbalubba.presentation.extensions.shimmerEffect
 import com.vladabur.wubbalubba.presentation.feature.character.tabs.EpisodesTabContent
 import com.vladabur.wubbalubba.presentation.feature.character.tabs.InformationTabContent
@@ -118,10 +119,10 @@ fun CharacterDetailsScreen(
                                 style = AppTypography.titleLarge
                             )
                         }
-                        uiState.character?.created?.toString()?.let {
+                        uiState.character?.created?.let {
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = it,
+                                text = it.getFullDate(),
                                 style = AppTypography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -302,7 +303,7 @@ private fun CharacterDetailsScreenPreview(
         uiState = CharacterDetailsUiState(
             character = character
         ),
-        baseUiState = BaseUiState(),
+        baseUiState = BaseUiState(isLoading = false),
         onEvent = {},
         onUpClicked = {}
     )
