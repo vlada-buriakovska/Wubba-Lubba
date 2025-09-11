@@ -1,3 +1,4 @@
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,18 +29,20 @@ fun <T> PaginatedLazyColumn(
     items: List<T>,
     itemKey: (T) -> Any,
     isLoading: Boolean,
+    isLoadingMore: Boolean,
     isRefreshing: Boolean,
     onLoadMore: (Int) -> Unit,
     onRefresh: () -> Unit,
     pageSize: Int,
     total: Int,
-    content: @Composable (T) -> Unit
+    content: @Composable (T) -> Unit,
+    placeHolder: (@Composable () -> Unit)? = null
 ) {
 
     val reachedBottom: Boolean by remember { derivedStateOf { !listState.canScrollForward } }
 
     LaunchedEffect(reachedBottom) {
-        if (items.isNotEmpty() && items.size < total && reachedBottom && !isLoading) {
+        if (items.isNotEmpty() && items.size < total && reachedBottom && !isLoadingMore) {
             val nextPage = (listState.layoutInfo.totalItemsCount / pageSize) + 1
             onLoadMore(nextPage)
         }
@@ -57,12 +60,17 @@ fun <T> PaginatedLazyColumn(
         LazyColumn(
             state = listState
         ) {
-            items(items = items, key = { item: T -> itemKey(item) }) { item ->
-                content(item)
-
+            if (isLoading) {
+                items(pageSize) {
+                    placeHolder?.invoke()
+                }
+            } else {
+                items(items = items, key = { item: T -> itemKey(item) }) { item ->
+                    content(item)
+                }
             }
             item {
-                if (isLoading) {
+                if (isLoadingMore) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()

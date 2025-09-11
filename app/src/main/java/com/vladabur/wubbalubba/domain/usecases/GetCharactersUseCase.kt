@@ -14,7 +14,8 @@ class GetCharactersUseCase @Inject constructor(private val characterRepository: 
 
     override suspend fun remoteWork(params: Params?): CharactersList {
         return withContext(Dispatchers.IO) {
-            delay(1000)
+            //FIXME just to sow longer loading
+            delay(2000)
             characterRepository.getCharactersList(params!!.page, params.name)
         }
     }
