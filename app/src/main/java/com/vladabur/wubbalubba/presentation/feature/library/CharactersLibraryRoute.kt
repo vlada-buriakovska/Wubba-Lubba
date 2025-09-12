@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -19,20 +21,32 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -40,12 +54,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.vladabur.wubbalubba.R
 import com.vladabur.wubbalubba.domain.models.Character
+import com.vladabur.wubbalubba.domain.models.CharacterSpecies
 import com.vladabur.wubbalubba.presentation.common.base.BaseUiState
 import com.vladabur.wubbalubba.presentation.extensions.shimmerEffect
 import com.vladabur.wubbalubba.presentation.feature.library.CharactersLibraryUiEvent.LoadMore
+import com.vladabur.wubbalubba.presentation.feature.library.CharactersLibraryUiEvent.OnGenderFilterChanged
 import com.vladabur.wubbalubba.presentation.feature.library.CharactersLibraryUiEvent.OnSearchQueryChanged
+import com.vladabur.wubbalubba.presentation.feature.library.CharactersLibraryUiEvent.OnSpeciesFilterChanged
+import com.vladabur.wubbalubba.presentation.feature.library.CharactersLibraryUiEvent.OnStatusFilterChanged
 import com.vladabur.wubbalubba.presentation.feature.library.CharactersLibraryUiEvent.Refresh
 import com.vladabur.wubbalubba.presentation.feature.library.CharactersLibraryVM.Companion.DEFAULT_LIST_PAGE_SIZE
+import com.vladabur.wubbalubba.presentation.ui.components.FilterChipsFlowRow
+import com.vladabur.wubbalubba.presentation.ui.components.MainButton
+import com.vladabur.wubbalubba.presentation.ui.components.SecondaryButton
 import com.vladabur.wubbalubba.presentation.ui.theme.AppTypography
 
 @Composable
@@ -73,8 +94,31 @@ fun CharactersLibraryScreen(
 ) {
     val lazyListState = rememberLazyListState()
     val keyboardController = LocalSoftwareKeyboardController.current
+    var showFilterBottomSheet by remember { mutableStateOf(false) }
 
     Column {
+        TopAppBar(
+            windowInsets = TopAppBarDefaults.windowInsets.only(WindowInsetsSides.Horizontal),
+            title = {
+                Text(
+                    text = stringResource(R.string.app_name),
+                    style = AppTypography.titleMedium
+                )
+            },
+            actions = {
+                IconButton(
+                    onClick = {
+                        showFilterBottomSheet = true
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.FilterList,
+                        tint = MaterialTheme.colorScheme.primary,
+                        contentDescription = "Filter"
+                    )
+                }
+            }
+        )
         SearchBar(
             modifier = Modifier
                 .fillMaxWidth()
@@ -104,8 +148,9 @@ fun CharactersLibraryScreen(
             expanded = false,
             onExpandedChange = {},
             content = {},
+            windowInsets = SearchBarDefaults.windowInsets.only(WindowInsetsSides.Horizontal)
         )
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box {
             val isListEmpty = uiState.charactersList?.isEmpty() == true
             val shouldShowEmptyListPlaceHolder = isListEmpty && baseUiState.isLoading == false
             Crossfade(
@@ -142,6 +187,15 @@ fun CharactersLibraryScreen(
                     )
                 }
             }
+            if (showFilterBottomSheet) {
+                FilterBottomSheet(
+                    uiState = uiState,
+                    onEvent = onEvent,
+                    onBottomSheetDismissed = {
+                        showFilterBottomSheet = false
+                    }
+                )
+            }
         }
     }
 }
@@ -172,7 +226,7 @@ private fun CharacterListItem(character: Character, onClick: () -> Unit) {
                 )
             }
             Spacer(modifier = Modifier.height(4.dp))
-            character.species?.let {
+            CharacterSpecies.toValue(character.species)?.let {
                 Text(
                     text = it,
                     style = AppTypography.bodySmall,
@@ -239,7 +293,101 @@ fun EmptyListPlaceholder() {
     }
 }
 
-@Preview(showSystemUi = true)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FilterBottomSheet(
+    uiState: CharactersLibraryUiState,
+    onEvent: (CharactersLibraryUiEvent) -> Unit,
+    onBottomSheetDismissed: () -> Unit,
+) {
+    val filterBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(
+        sheetState = filterBottomSheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+        onDismissRequest = {
+            onBottomSheetDismissed()
+        },
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = "Filter",
+                style = AppTypography.titleLarge,
+                textAlign = TextAlign.Center
+            )
+            uiState.statusFilter?.let {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = "Status",
+                    style = AppTypography.titleMedium,
+                )
+                FilterChipsFlowRow(
+                    itemsList = it,
+                    onClick = { item ->
+                        onEvent(OnStatusFilterChanged(item))
+                    },
+                )
+            }
+            uiState.speciesFilter?.let {
+                HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = "Species",
+                    style = AppTypography.titleMedium,
+                )
+                FilterChipsFlowRow(
+                    itemsList = it,
+                    onClick = { item ->
+                        onEvent(OnSpeciesFilterChanged(item))
+                    },
+                )
+            }
+            uiState.genderFilter?.let {
+                HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = "Gender",
+                    style = AppTypography.titleMedium,
+                )
+                FilterChipsFlowRow(
+                    itemsList = it,
+                    onClick = { item ->
+                        onEvent(OnGenderFilterChanged(item))
+                    },
+                )
+            }
+            Row(modifier = Modifier.fillMaxWidth().padding(top = 24.dp)) {
+                SecondaryButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1F),
+                    label = "Reset All",
+                    onClick = {
+                        onEvent(CharactersLibraryUiEvent.ResetFilters)
+                        onBottomSheetDismissed()
+                    }
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                MainButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1F),
+                    label = "Apply",
+                    onClick = {
+                        onEvent(CharactersLibraryUiEvent.ApplyFilters)
+                        onBottomSheetDismissed()
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun CharactersLibraryScreenPreview() {
     CharactersLibraryScreen(
