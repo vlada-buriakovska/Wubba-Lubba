@@ -47,6 +47,8 @@ import com.vladabur.wubbalubba.presentation.extensions.getFullDate
 import com.vladabur.wubbalubba.presentation.extensions.shimmerEffect
 import com.vladabur.wubbalubba.presentation.feature.character.tabs.EpisodesTabContent
 import com.vladabur.wubbalubba.presentation.feature.character.tabs.InformationTabContent
+import com.vladabur.wubbalubba.presentation.ui.components.ConnectionError
+import com.vladabur.wubbalubba.presentation.ui.components.ErrorSnackBar
 import com.vladabur.wubbalubba.presentation.ui.theme.AppTypography
 
 
@@ -175,6 +177,21 @@ fun CharacterDetailsScreen(
                     }
                 }
             }
+        }
+        if (baseUiState.isConnectionError == true) {
+            ConnectionError(
+                onRetry = {
+                    onEvent(CharacterDetailsUiEvent.Retry)
+                }
+            )
+        }
+        if (baseUiState.error != null) {
+            ErrorSnackBar(
+                error = baseUiState.error,
+                onDismissed = {
+                    onEvent(CharacterDetailsUiEvent.Consume)
+                }
+            )
         }
     }
 }

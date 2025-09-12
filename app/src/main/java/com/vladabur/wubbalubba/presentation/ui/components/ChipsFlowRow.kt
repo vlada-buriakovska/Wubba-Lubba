@@ -10,9 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.contentcapture.ContentCaptureManager.Companion.isEnabled
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -23,6 +21,7 @@ import com.vladabur.wubbalubba.domain.models.CharacterSpecies
 import com.vladabur.wubbalubba.domain.models.CharacterStatus
 import com.vladabur.wubbalubba.presentation.FilterItem
 import com.vladabur.wubbalubba.presentation.common.preview.CharacterPreviewProvider
+import com.vladabur.wubbalubba.presentation.ui.kit.Chip
 import androidx.compose.material.Chip as MaterialChip
 
 @Composable

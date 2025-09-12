@@ -1,12 +1,9 @@
-package com.vladabur.wubbalubba.presentation.ui.components
+package com.vladabur.wubbalubba.presentation.ui.kit
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -17,14 +14,10 @@ import com.vladabur.wubbalubba.presentation.ui.theme.AppTypography
 
 
 @Composable
-fun SecondaryButton(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun MainButton(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Button(
         modifier = modifier,
         shape = RoundedCornerShape(20),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.secondary,
-            contentColor = MaterialTheme.colorScheme.onSurface
-        ),
         onClick = {
             onClick()
         }
@@ -42,9 +35,9 @@ fun SecondaryButton(label: String, onClick: () -> Unit, modifier: Modifier = Mod
 
 @Preview(showBackground = true)
 @Composable
-private fun SecondaryPreview() {
-    SecondaryButton(
+private fun MainButtonPreview() {
+    MainButton(
         label = "Apply",
-        onClick = {},
+        onClick = {}
     )
 }

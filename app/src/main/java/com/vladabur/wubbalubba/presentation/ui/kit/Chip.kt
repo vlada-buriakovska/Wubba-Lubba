@@ -1,4 +1,4 @@
-package com.vladabur.wubbalubba.presentation.ui.components
+package com.vladabur.wubbalubba.presentation.ui.kit
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background

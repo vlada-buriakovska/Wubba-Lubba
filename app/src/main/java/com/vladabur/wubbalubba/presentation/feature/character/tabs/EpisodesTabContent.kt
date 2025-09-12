@@ -9,7 +9,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.vladabur.wubbalubba.domain.models.Character
 import com.vladabur.wubbalubba.presentation.common.preview.CharacterPreviewProvider
-import com.vladabur.wubbalubba.presentation.ui.components.Chip
+import com.vladabur.wubbalubba.presentation.ui.kit.Chip
 import com.vladabur.wubbalubba.presentation.ui.components.NonlazyGrid
 
 @Composable
