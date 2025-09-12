@@ -1,5 +1,6 @@
 package com.vladabur.wubbalubba.presentation.feature.character
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -52,6 +53,7 @@ import com.vladabur.wubbalubba.presentation.extensions.getFullDate
 import com.vladabur.wubbalubba.presentation.extensions.shimmerEffect
 import com.vladabur.wubbalubba.presentation.feature.character.tabs.EpisodesTabContent
 import com.vladabur.wubbalubba.presentation.feature.character.tabs.InformationTabContent
+import com.vladabur.wubbalubba.presentation.feature.library.CharactersLibraryUiEvent
 import com.vladabur.wubbalubba.presentation.ui.components.ConnectionError
 import com.vladabur.wubbalubba.presentation.ui.components.ErrorSnackBar
 import com.vladabur.wubbalubba.presentation.ui.theme.AppTypography
@@ -104,6 +106,13 @@ fun CharacterDetailsScreen(
                         },
                         windowInsets = TopAppBarDefaults.windowInsets.only(WindowInsetsSides.Horizontal)
                     )
+                    AnimatedVisibility(baseUiState.isConnectionError == true) {
+                        ConnectionError(
+                            onRetry = {
+                                onEvent(CharacterDetailsUiEvent.Retry)
+                            }
+                        )
+                    }
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -184,13 +193,6 @@ fun CharacterDetailsScreen(
                     }
                 }
             }
-        }
-        if (baseUiState.isConnectionError == true) {
-            ConnectionError(
-                onRetry = {
-                    onEvent(CharacterDetailsUiEvent.Retry)
-                }
-            )
         }
         if (baseUiState.error != null) {
             ErrorSnackBar(

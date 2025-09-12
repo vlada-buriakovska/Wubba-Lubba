@@ -1,7 +1,6 @@
 package com.vladabur.wubbalubba.presentation.feature.library
 
 import PaginatedLazyColumn
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
@@ -22,9 +21,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -45,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -74,6 +78,7 @@ import com.vladabur.wubbalubba.presentation.ui.components.FilterChipsFlowRow
 import com.vladabur.wubbalubba.presentation.ui.kit.MainButton
 import com.vladabur.wubbalubba.presentation.ui.kit.SecondaryButton
 import com.vladabur.wubbalubba.presentation.ui.theme.AppTypography
+import com.vladabur.wubbalubba.presentation.ui.theme.LightPrimaryRed
 
 @Composable
 fun CharactersLibraryRoute(
@@ -90,7 +95,7 @@ fun CharactersLibraryRoute(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun CharactersLibraryScreen(
     uiState: CharactersLibraryUiState,
@@ -170,34 +175,49 @@ fun CharactersLibraryScreen(
             Crossfade(
                 targetState = shouldShowEmptyListPlaceHolder,
             ) {
-                if (it) {
-                    EmptyListPlaceholder()
-                } else {
-                    PaginatedLazyColumn(
-                        listState = lazyListState,
-                        items = uiState.charactersList ?: emptyList(),
-                        itemKey = { item ->
-                            item.id
-                        },
-                        isLoading = baseUiState.isLoading == true,
-                        isLoadingMore = uiState.isLoadingMore == true,
-                        isRefreshing = uiState.isRefreshing == true,
-                        pageSize = DEFAULT_LIST_PAGE_SIZE,
-                        total = uiState.charactersListTotal ?: 0,
-                        onLoadMore = { page ->
-                            onEvent.invoke(LoadMore(page))
-                        },
-                        onRefresh = {
-                            onEvent.invoke(Refresh)
-                        },
-                        content = { character ->
-                            CharacterListItem(character) {
-                                onCharacterClicked(character)
+
+                val pullRefreshState = rememberPullRefreshState(
+                    refreshing = uiState.isRefreshing == true, onRefresh = {
+                        onEvent.invoke(Refresh)
+                    }
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .pullRefresh(pullRefreshState)
+                ) {
+                    if (it) {
+                        EmptyListPlaceholder()
+                    } else {
+                        PaginatedLazyColumn(
+                            listState = lazyListState,
+                            items = uiState.charactersList ?: emptyList(),
+                            itemKey = { item ->
+                                item.id
+                            },
+                            isLoading = baseUiState.isLoading == true,
+                            isLoadingMore = uiState.isLoadingMore == true,
+                            pageSize = DEFAULT_LIST_PAGE_SIZE,
+                            total = uiState.charactersListTotal ?: 0,
+                            onLoadMore = { page ->
+                                onEvent.invoke(LoadMore(page))
+                            },
+                            content = { character ->
+                                CharacterListItem(character) {
+                                    onCharacterClicked(character)
+                                }
+                            },
+                            placeHolder = {
+                                CharacterListItemPlaceholder()
                             }
-                        },
-                        placeHolder = {
-                            CharacterListItemPlaceholder()
-                        }
+                        )
+                    }
+                    PullRefreshIndicator(
+                        modifier = Modifier.align(Alignment.TopCenter),
+                        refreshing = uiState.isRefreshing == true,
+                        state = pullRefreshState,
+                        backgroundColor = White,
+                        contentColor = LightPrimaryRed
                     )
                 }
             }
@@ -343,7 +363,7 @@ fun FilterBottomSheet(
                 style = AppTypography.titleLarge,
                 textAlign = TextAlign.Center
             )
-            uiState.statusFilter?.let {
+            uiState.statusFilterItems?.let {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     text = stringResource(R.string.character_details_status_title),
@@ -351,12 +371,13 @@ fun FilterBottomSheet(
                 )
                 FilterChipsFlowRow(
                     itemsList = it,
+                    chosenItem = uiState.statusFilterItem,
                     onClick = { item ->
                         onEvent(OnStatusFilterChanged(item))
                     },
                 )
             }
-            uiState.speciesFilter?.let {
+            uiState.speciesFilterItems?.let {
                 HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
                 Text(
                     modifier = Modifier.fillMaxWidth(),
@@ -365,12 +386,13 @@ fun FilterBottomSheet(
                 )
                 FilterChipsFlowRow(
                     itemsList = it,
+                    chosenItem = uiState.speciesFilterItem,
                     onClick = { item ->
                         onEvent(OnSpeciesFilterChanged(item))
                     },
                 )
             }
-            uiState.genderFilter?.let {
+            uiState.genderFilterItems?.let {
                 HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
                 Text(
                     modifier = Modifier.fillMaxWidth(),
@@ -379,6 +401,7 @@ fun FilterBottomSheet(
                 )
                 FilterChipsFlowRow(
                     itemsList = it,
+                    chosenItem = uiState.genderFilterItem,
                     onClick = { item ->
                         onEvent(OnGenderFilterChanged(item))
                     },

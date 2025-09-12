@@ -40,15 +40,21 @@ class CharacterDetailsVM @Inject constructor(
         }
     }
 
-    private fun getCharacter(characterId: Int) {
+    private fun getCharacter(
+        characterId: Int,
+        isFromLocal: Boolean = false,
+        isForceReload: Boolean = false
+    ) {
         getCharacterUseCase(
             coroutineScope = viewModelScope,
             params = Params(
+                isFromLocal = isFromLocal || baseUiState.value.isConnectionError == true,
+                isForceReload = isForceReload,
                 id = characterId
             ),
             result = ResultCallbacks(
                 onSuccess = { result ->
-                    managerUiState.update { 
+                    managerUiState.update {
                         it.copy(character = result)
                     }
                 },
@@ -56,7 +62,14 @@ class CharacterDetailsVM @Inject constructor(
                 onError = ::handleOnError,
                 onUnexpectedError = ::handleOnUnexpectedError,
                 onConnectionError = {
-                    handleOnConnectionError { getCharacter(characterId) }
+                    getCharacter(characterId, true)
+                    handleOnConnectionError {
+                        getCharacter(
+                            characterId = characterId,
+                            isFromLocal = false,
+                            isForceReload = true
+                        )
+                    }
                 }
             )
         )
