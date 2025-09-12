@@ -11,7 +11,6 @@ import com.vladabur.wubbalubba.domain.usecases.GetCharactersUseCase.Params
 import com.vladabur.wubbalubba.domain.usecases.base.ResultCallbacks
 import com.vladabur.wubbalubba.presentation.FilterItem
 import com.vladabur.wubbalubba.presentation.common.base.BaseViewModel
-import com.vladabur.wubbalubba.presentation.extensions.toggleFilterItem
 import com.vladabur.wubbalubba.presentation.feature.library.CharactersLibraryUiEvent.ApplyFilters
 import com.vladabur.wubbalubba.presentation.feature.library.CharactersLibraryUiEvent.Consume
 import com.vladabur.wubbalubba.presentation.feature.library.CharactersLibraryUiEvent.LoadMore
@@ -81,8 +80,9 @@ class CharactersLibraryVM @Inject constructor(
 
             is OnStatusFilterChanged -> {
                 managerUiState.update {
+                    val newItem = if (it.statusFilterItem == event.filterItem) null else event.filterItem
                     it.copy(
-                        statusFilter = managerUiState.value.statusFilter?.toggleFilterItem(event.filterItem)
+                        statusFilterItem = newItem
                     )
                 }
             }
@@ -90,22 +90,24 @@ class CharactersLibraryVM @Inject constructor(
 
             is OnSpeciesFilterChanged -> {
                 managerUiState.update {
+                    val newItem = if (it.speciesFilterItem == event.filterItem) null else event.filterItem
                     it.copy(
-                        speciesFilter = managerUiState.value.speciesFilter?.toggleFilterItem(event.filterItem)
+                        speciesFilterItem = newItem
                     )
                 }
             }
 
             is OnGenderFilterChanged -> {
                 managerUiState.update {
+                    val newItem = if (it.genderFilterItem == event.filterItem) null else event.filterItem
                     it.copy(
-                        genderFilter = managerUiState.value.genderFilter?.toggleFilterItem(event.filterItem)
+                        genderFilterItem = newItem
                     )
                 }
             }
 
             ResetFilters -> {
-                initAllFilterLists()
+                resetFilters()
                 getCharacters()
             }
 
@@ -117,48 +119,50 @@ class CharactersLibraryVM @Inject constructor(
 
     private fun initAllFilterLists() {
         val statusList = CharacterStatus.entries.mapNotNull { it.value }.map { item ->
-            FilterItem(item, false)
+            FilterItem(item)
         }
         val speciesList =
             CharacterSpecies.entries.mapNotNull { it.value }.map { item ->
-                FilterItem(item.replaceFirstChar { it.uppercase() }, false)
+                FilterItem(item.replaceFirstChar { it.uppercase() })
             }
         val genderList = CharacterGender.entries.mapNotNull { it.value }.map { item ->
-            FilterItem(item.replaceFirstChar { it.uppercase() }, false)
+            FilterItem(item.replaceFirstChar { it.uppercase() })
         }
         managerUiState.update {
             it.copy(
-                statusFilter = statusList,
-                speciesFilter = speciesList,
-                genderFilter = genderList
+                statusFilterItems = statusList,
+                speciesFilterItems = speciesList,
+                genderFilterItems = genderList
+            )
+        }
+    }
+
+    private fun resetFilters() {
+        managerUiState.update {
+            it.copy(
+                statusFilterItem = null,
+                speciesFilterItem = null,
+                genderFilterItem = null
             )
         }
     }
 
     private fun getCharacters(
         page: Int = FIRST_PAGE_INDEX,
-        isRefreshing: Boolean = false
+        isRefreshing: Boolean = false,
+        isForceReload: Boolean = false,
+        isFromLocal: Boolean = false
     ) {
         getCharactersUseCase(
             coroutineScope = viewModelScope,
             params = Params(
+                isFromLocal = isFromLocal || baseUiState.value.isConnectionError == true,
+                isForceReload = isForceReload,
                 page = page,
                 name = managerUiState.value.searchQuery,
-                statuses = managerUiState.value.statusFilter?.mapNotNull {
-                    if (it.isEnabled) CharacterStatus.fromValue(
-                        it.label
-                    ) else null
-                },
-                species = managerUiState.value.speciesFilter?.mapNotNull {
-                    if (it.isEnabled) CharacterSpecies.fromValue(
-                        it.label
-                    ) else null
-                },
-                genders = managerUiState.value.genderFilter?.mapNotNull {
-                    if (it.isEnabled) CharacterGender.fromValue(
-                        it.label
-                    ) else null
-                }
+                status = CharacterStatus.fromValue(managerUiState.value.statusFilterItem?.label),
+                species = CharacterSpecies.fromValue(managerUiState.value.speciesFilterItem?.label),
+                gender = CharacterGender.fromValue(managerUiState.value.genderFilterItem?.label),
             ),
             result = ResultCallbacks(
                 onSuccess = { result ->
@@ -186,7 +190,19 @@ class CharactersLibraryVM @Inject constructor(
                 },
                 onUnexpectedError = ::handleOnUnexpectedError,
                 onConnectionError = {
-                    handleOnConnectionError { getCharacters(page) }
+                    getCharacters(
+                        page = page,
+                        isRefreshing = isRefreshing,
+                        isFromLocal = isFromLocal,
+                    )
+                    handleOnConnectionError {
+                        getCharacters(
+                            page = FIRST_PAGE_INDEX,
+                            isRefreshing = false,
+                            isFromLocal = false,
+                            isForceReload = true
+                        )
+                    }
                 }
             )
         )
@@ -264,7 +280,10 @@ data class CharactersLibraryUiState(
     val isRefreshing: Boolean? = null,
     val isLoadingMore: Boolean? = null,
     val searchQuery: String? = null,
-    val statusFilter: List<FilterItem>? = null,
-    val speciesFilter: List<FilterItem>? = null,
-    val genderFilter: List<FilterItem>? = null
+    val statusFilterItems: List<FilterItem>? = null,
+    val speciesFilterItems: List<FilterItem>? = null,
+    val genderFilterItems: List<FilterItem>? = null,
+    val statusFilterItem: FilterItem? = null,
+    val speciesFilterItem: FilterItem? = null,
+    val genderFilterItem: FilterItem? = null
 )

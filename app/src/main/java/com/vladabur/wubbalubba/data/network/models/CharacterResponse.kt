@@ -1,6 +1,7 @@
 package com.vladabur.wubbalubba.data.network.models
 
 import com.google.gson.annotations.SerializedName
+import com.vladabur.wubbalubba.data.database.entities.CharacterEntity
 import com.vladabur.wubbalubba.domain.models.Character
 import com.vladabur.wubbalubba.domain.models.CharacterGender
 import com.vladabur.wubbalubba.domain.models.CharacterSpecies
@@ -32,8 +33,7 @@ data class CharacterResponse(
     @SerializedName("created")
     val created: Date?
 ) {
-    companion object : ModelMapper<CharacterResponse, Character> {
-
+     object CharacterMapper: ModelMapper<CharacterResponse, Character> {
         override fun map(model: CharacterResponse): Character = Character(
             id = model.id,
             name = model.name,
@@ -47,6 +47,21 @@ data class CharacterResponse(
             episode = model.episode,
             created = model.created,
         )
-
+    }
+    
+     object CharacterEntityMapper: ModelMapper<CharacterResponse, CharacterEntity> {
+        override fun map(model: CharacterResponse): CharacterEntity = CharacterEntity(
+            id = model.id,
+            name = model.name,
+            status = model.status,
+            species = model.species,
+            type = model.type,
+            gender = model.gender,
+            origin = model.origin?.name,
+            location = model.location?.name,
+            image = model.image,
+            episode = model.episode,
+            created = model.created,
+        )
     }
 }

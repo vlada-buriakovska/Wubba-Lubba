@@ -10,12 +10,18 @@ import com.vladabur.wubbalubba.domain.models.CharactersList
 interface CharacterRepository {
 
     suspend fun getCharactersList(
+        isFromLocal: Boolean,
+        isForceReload: Boolean,
         page: Int,
         name: String?,
-        statuses: List<CharacterStatus>?,
-        species: List<CharacterSpecies>?,
-        genders: List<CharacterGender>?,
+        status: CharacterStatus?,
+        species: CharacterSpecies?,
+        gender: CharacterGender?,
     ): CharactersList
 
-    suspend fun getCharacter(id: Int): Character
+    suspend fun getCharacter(
+        isFromLocal: Boolean,
+        isForceReload: Boolean,
+        id: Int
+    ): Character?
 }

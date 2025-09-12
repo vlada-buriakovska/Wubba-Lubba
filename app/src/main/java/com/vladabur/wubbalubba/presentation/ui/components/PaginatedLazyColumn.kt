@@ -22,7 +22,6 @@ import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.unit.dp
 import com.vladabur.wubbalubba.presentation.ui.theme.LightPrimaryRed
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun <T> PaginatedLazyColumn(
     listState: LazyListState,
@@ -30,9 +29,7 @@ fun <T> PaginatedLazyColumn(
     itemKey: (T) -> Any,
     isLoading: Boolean,
     isLoadingMore: Boolean,
-    isRefreshing: Boolean,
     onLoadMore: (Int) -> Unit,
-    onRefresh: () -> Unit,
     pageSize: Int,
     total: Int,
     content: @Composable (T) -> Unit,
@@ -47,49 +44,31 @@ fun <T> PaginatedLazyColumn(
             onLoadMore(nextPage)
         }
     }
-    val pullRefreshState = rememberPullRefreshState(
-        refreshing = isRefreshing, onRefresh = {
-            onRefresh.invoke()
-        }
-    )
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .pullRefresh(pullRefreshState)
+    LazyColumn(
+        state = listState
     ) {
-        LazyColumn(
-            state = listState
-        ) {
-            if (isLoading) {
-                items(pageSize) {
-                    placeHolder?.invoke()
-                }
-            } else {
-                items(items = items, key = { item: T -> itemKey(item) }) { item ->
-                    content(item)
-                }
+        if (isLoading) {
+            items(pageSize) {
+                placeHolder?.invoke()
             }
-            item {
-                if (isLoadingMore) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            color = LightPrimaryRed
-                        )
-                    }
+        } else {
+            items(items = items, key = { item: T -> itemKey(item) }) { item ->
+                content(item)
+            }
+        }
+        item {
+            if (isLoadingMore) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        color = LightPrimaryRed
+                    )
                 }
             }
         }
-        PullRefreshIndicator(
-            modifier = Modifier.align(Alignment.TopCenter),
-            refreshing = isRefreshing,
-            state = pullRefreshState,
-            backgroundColor = White,
-            contentColor = LightPrimaryRed
-        )
     }
 }

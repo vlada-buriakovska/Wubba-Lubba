@@ -21,11 +21,11 @@ interface CharacterService {
         species: String? = null,
         @Query("gender")
         gender: String? = null,
-    ): CharactersListResponse
+    ): CharactersListResponse?
 
     @GET("character/{id}")
     suspend fun getCharacter(
         @Path("id")
         id: Int,
-    ): CharacterResponse
+    ): CharacterResponse?
 }

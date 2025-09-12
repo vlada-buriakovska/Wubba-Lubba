@@ -11,17 +11,19 @@ import javax.inject.Inject
 
 
 class GetCharacterUseCase @Inject constructor(private val characterRepository: CharacterRepository) :
-    BaseUseCase<GetCharacterUseCase.Params, Character>() {
+    BaseUseCase<GetCharacterUseCase.Params, Character?>() {
 
-    override suspend fun remoteWork(params: Params?): Character {
+    override suspend fun remoteWork(params: Params?): Character? {
         return withContext(Dispatchers.IO) {
             //FIXME just to sow longer loading
             delay(1000)
-            characterRepository.getCharacter(params!!.id)
+            characterRepository.getCharacter(params!!.isFromLocal, params.isForceReload, params.id)
         }
     }
 
     class Params(
+        val isFromLocal: Boolean,
+        val isForceReload: Boolean,
         val id: Int,
     )
 }

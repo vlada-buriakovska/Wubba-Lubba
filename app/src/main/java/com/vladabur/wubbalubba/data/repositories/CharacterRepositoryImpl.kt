@@ -1,9 +1,12 @@
 package com.vladabur.wubbalubba.data.repositories
 
+import androidx.room.withTransaction
+import com.vladabur.wubbalubba.data.database.AppDatabase
+import com.vladabur.wubbalubba.data.database.dao.CharacterDao
+import com.vladabur.wubbalubba.data.database.entities.CharacterEntity
 import com.vladabur.wubbalubba.data.extensions.mapToApiErrors
-import com.vladabur.wubbalubba.data.network.models.CharacterResponse
-import com.vladabur.wubbalubba.data.network.models.CharactersListResponse
-import com.vladabur.wubbalubba.data.network.models.InfoResponse
+import com.vladabur.wubbalubba.data.network.models.CharacterResponse.CharacterEntityMapper
+import com.vladabur.wubbalubba.data.network.models.CharacterResponse.CharacterMapper
 import com.vladabur.wubbalubba.data.network.services.CharacterService
 import com.vladabur.wubbalubba.domain.models.Character
 import com.vladabur.wubbalubba.domain.models.CharacterGender
@@ -14,64 +17,82 @@ import com.vladabur.wubbalubba.domain.repositories.CharacterRepository
 import javax.inject.Inject
 
 
-class CharacterRepositoryImpl @Inject constructor(private val characterService: CharacterService) :
+class CharacterRepositoryImpl @Inject constructor(
+    private val characterService: CharacterService,
+    private val database: AppDatabase,
+    private val characterDao: CharacterDao,
+) :
     CharacterRepository {
 
     override suspend fun getCharactersList(
+        isFromLocal: Boolean,
+        isForceReload: Boolean,
         page: Int,
         name: String?,
-        statuses: List<CharacterStatus>?,
-        species: List<CharacterSpecies>?,
-        genders: List<CharacterGender>?,
+        status: CharacterStatus?,
+        species: CharacterSpecies?,
+        gender: CharacterGender?
     ): CharactersList {
         return try {
-            val response =
-                if (statuses.isNullOrEmpty() && genders.isNullOrEmpty() && species.isNullOrEmpty()) {
-                    characterService.getCharacters(page, name)
-                } else {
-                    val result = mutableListOf<CharacterResponse>()
-                    var total = 0
-                    val statusesToUse = if (statuses.isNullOrEmpty()) listOf(null) else statuses
-                    val speciesToUse = if (species.isNullOrEmpty()) listOf(null) else species
-                    val gendersToUse = if (genders.isNullOrEmpty()) listOf(null) else genders
+            val statusString = status?.let { CharacterStatus.toValue(it) }
+            val speciesString = species?.let { CharacterSpecies.toValue(it) }
+            val genderString = gender?.let { CharacterGender.toValue(it) }
+            val (entities, total) = if (!isFromLocal || isForceReload) {
+                val response = characterService.getCharacters(
+                    page,
+                    name,
+                    statusString,
+                    speciesString,
+                    genderString
+                )
+                val result = response?.results?.map { CharacterEntityMapper.map(it) } ?: emptyList()
 
-                    for (status in statusesToUse) {
-                        for (type in speciesToUse) {
-                            for (gender in gendersToUse) {
-                                val statusString = status?.let { CharacterStatus.toValue(it) }
-                                val speciesString = type?.let { CharacterSpecies.toValue(it) }
-                                val genderString = gender?.let { CharacterGender.toValue(it) }
-                                val response = characterService.getCharacters(
-                                    page = page,
-                                    name = name,
-                                    status = statusString,
-                                    species = speciesString,
-                                    gender = genderString
-                                )
-                                val charactersList =
-                                    response.results?.filter {
-                                        (if (statusString != null) it.status == statusString else true)
-                                                && (if (speciesString != null) it.species == speciesString else true)
-                                                && (if (genderString != null) it.gender == genderString else true)
-                                    }
-                                result.addAll(charactersList ?: emptyList())
-                                total += response.info?.count ?: 0
-                            }
-                        }
+                database.withTransaction {
+                    if (isForceReload) {
+                        characterDao.clearAll()
                     }
-                    result.sortBy { it.name }
-                    CharactersListResponse(info = InfoResponse(count = total), results = result)
+                    characterDao.insertAll(result)
                 }
-            CharactersListResponse.map(response)
+                Pair(result, response?.info?.count ?: 0)
+            } else {
+                val result = characterDao.getCharacters(
+                    page,
+                    name,
+                    statusString,
+                    speciesString,
+                    genderString
+                )
+                val total = characterDao.countCharacters(
+                    name,
+                    statusString,
+                    speciesString,
+                    genderString
+                )
+                Pair(result, total)
+            }
+
+            CharactersList(
+                total = total,
+                characters = entities.map { CharacterEntity.map(it) }
+            )
         } catch (e: Exception) {
             throw e.mapToApiErrors()
         }
     }
 
-    override suspend fun getCharacter(id: Int): Character {
+    override suspend fun getCharacter(
+        isFromLocal: Boolean,
+        isForceReload: Boolean,
+        id: Int
+    ): Character? {
         return try {
-            val response = characterService.getCharacter(id)
-            CharacterResponse.map(response)
+            if (!isFromLocal || isForceReload) {
+                val response = characterService.getCharacter(id)
+                response?.let { CharacterMapper.map(it) }
+            } else {
+                val entity = characterDao.getCharacterById(id)
+                entity?.let { CharacterEntity.map(entity) }
+            }
         } catch (e: Exception) {
             throw e.mapToApiErrors()
         }

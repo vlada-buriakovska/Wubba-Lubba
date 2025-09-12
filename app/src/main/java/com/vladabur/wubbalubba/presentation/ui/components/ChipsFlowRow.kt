@@ -50,6 +50,7 @@ fun ChipsFlowRow(
 @Composable
 fun FilterChipsFlowRow(
     itemsList: List<FilterItem>,
+    chosenItem: FilterItem?,
     modifier: Modifier = Modifier,
     onClick: (FilterItem) -> Unit
 ) {
@@ -57,11 +58,11 @@ fun FilterChipsFlowRow(
         modifier = modifier, horizontalArrangement = Arrangement.spacedBy(8.dp), content = {
             itemsList.forEach { item ->
                 if (item.label.isNotEmpty()) {
-                    val backgroundColor = if (item.isEnabled) MaterialTheme.colorScheme.primary
+                    val backgroundColor = if (item == chosenItem) MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.surface
-                    val contentColor = if (item.isEnabled) MaterialTheme.colorScheme.onPrimary
+                    val contentColor = if (item == chosenItem) MaterialTheme.colorScheme.onPrimary
                     else MaterialTheme.colorScheme.onSurface
-                    val borderColor = if (item.isEnabled) Color.Transparent
+                    val borderColor = if (item == chosenItem) Color.Transparent
                     else MaterialTheme.colorScheme.secondary
 
                     MaterialChip(
@@ -102,15 +103,16 @@ private fun CharacterDetailsChipsPreview(
             character.gender?.let { CharacterGender.toValue(it) }
         )
     val clickableItemsList = itemsList.mapIndexed { index, item ->
-        val isEnabled = index % 2 == 0
-        FilterItem(item, isEnabled)
+        FilterItem(item)
     }
     Column {
         ChipsFlowRow(itemsList)
         FilterChipsFlowRow(
-            clickableItemsList, onClick = {
+            clickableItemsList,
+            chosenItem = FilterItem("Alive"),
+            onClick = {
 
-            }
+            },
         )
     }
 }
