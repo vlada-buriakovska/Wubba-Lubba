@@ -2,6 +2,8 @@ package com.vladabur.wubbalubba.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 val LightPrimaryRed = Color(0xFFD9493F)
+val LightOnPrimary = Color(0xFFF5F5F5)
+val LightSecondary = Color(0xFFD3D3D3)
 val LightBackground = Color(0xFFF5F5F5)
 val LightSurface = Color(0xFFFFFFFF)
 val LightOnSurface = Color(0xFF212121)
