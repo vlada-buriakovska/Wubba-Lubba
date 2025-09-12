@@ -305,7 +305,7 @@ fun EmptyListPlaceholder() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
-            painter = painterResource(id = R.drawable.ic_sad_rick),
+            painter = painterResource(id = R.drawable.ic_morty),
             contentDescription = stringResource(R.string.empty_list_image_description)
         )
         Spacer(modifier = Modifier.height(8.dp))
