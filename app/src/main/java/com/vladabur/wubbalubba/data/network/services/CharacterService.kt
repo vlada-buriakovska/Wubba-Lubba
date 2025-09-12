@@ -15,6 +15,12 @@ interface CharacterService {
         page: Int,
         @Query("name")
         name: String?,
+        @Query("status")
+        status: String? = null,
+        @Query("species")
+        species: String? = null,
+        @Query("gender")
+        gender: String? = null,
     ): CharactersListResponse
 
     @GET("character/{id}")
