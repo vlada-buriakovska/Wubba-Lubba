@@ -1,6 +1,8 @@
 package com.vladabur.wubbalubba.presentation.feature.library
 
 import PaginatedLazyColumn
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -124,6 +126,13 @@ fun CharactersLibraryScreen(
                     }
                 }
             )
+            AnimatedVisibility(baseUiState.isConnectionError == true) {
+                ConnectionError(
+                    onRetry = {
+                        onEvent(CharactersLibraryUiEvent.Retry)
+                    }
+                )
+            }
             SearchBar(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -200,14 +209,6 @@ fun CharactersLibraryScreen(
                 onEvent = onEvent,
                 onBottomSheetDismissed = {
                     showFilterBottomSheet = false
-                }
-            )
-        }
-
-        if (baseUiState.isConnectionError == true) {
-            ConnectionError(
-                onRetry = {
-                    onEvent(CharactersLibraryUiEvent.Retry)
                 }
             )
         }

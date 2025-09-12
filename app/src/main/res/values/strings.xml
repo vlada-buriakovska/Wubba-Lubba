@@ -2,7 +2,8 @@
     <string name="app_name">Wubba Lubba</string>
     <string name="all_search">Search…</string>
     <string name="all_back">Back</string>
-    <string name="all_no_connection">No Connection</string>
+    <string name="all_no_connection">You\'re offline. Viewing cached data.</string>
+    <string name="all_tap_to_reconnect">Tap to reconnect</string>
     <string name="all_retry">Retry</string>
     <string name="all_ok">OK</string>
     <string name="all_filter">Filter</string>
