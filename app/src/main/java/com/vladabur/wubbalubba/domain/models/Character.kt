@@ -6,10 +6,10 @@ import java.util.Date
 data class Character(
     val id: Int,
     val name: String?,
-    val status: String?,
-    val species: String?,
+    val status: CharacterStatus?,
+    val species: CharacterSpecies?,
     val type: String?,
-    val gender: String?,
+    val gender: CharacterGender?,
     val origin: Location?,
     val location: Location?,
     val image: String?,

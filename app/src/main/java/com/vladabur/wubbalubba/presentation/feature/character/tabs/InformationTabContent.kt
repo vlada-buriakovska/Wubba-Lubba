@@ -1,15 +1,9 @@
 package com.vladabur.wubbalubba.presentation.feature.character.tabs
 
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -19,50 +13,25 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.vladabur.wubbalubba.R
 import com.vladabur.wubbalubba.domain.models.Character
+import com.vladabur.wubbalubba.domain.models.CharacterGender
+import com.vladabur.wubbalubba.domain.models.CharacterSpecies
+import com.vladabur.wubbalubba.domain.models.CharacterStatus
 import com.vladabur.wubbalubba.presentation.common.preview.CharacterPreviewProvider
-import com.vladabur.wubbalubba.presentation.ui.components.Chip
+import com.vladabur.wubbalubba.presentation.ui.components.ChipsFlowRow
 import com.vladabur.wubbalubba.presentation.ui.theme.AppTypography
 
 @Composable
 fun InformationTabContent(character: Character) {
     Column(modifier = Modifier.padding(16.dp)) {
-        val scrollState = rememberScrollState()
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(scrollState)
-        ) {
-            if (!character.status.isNullOrEmpty()) {
-                Chip(
-                    label = character.status,
-                    borderColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.primary
-                )
-            }
-            if (!character.species.isNullOrEmpty()) {
-                Chip(
-                    label = character.species,
-                    borderColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.primary
-                )
-            }
-            if (!character.type.isNullOrEmpty()) {
-                Chip(
-                    label = character.type,
-                    borderColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.primary
-                )
-            }
-            if (!character.gender.isNullOrEmpty()) {
-                Chip(
-                    label = character.gender,
-                    borderColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.primary
-                )
-            }
-        }
+        val itemsList =
+            listOfNotNull(
+                character.status?.let { CharacterStatus.toValue(it) },
+                character.species?.let { CharacterSpecies.toValue(it) },
+                character.type,
+                character.gender?.let { CharacterGender.toValue(it) }
+            )
 
+        ChipsFlowRow(itemsList = itemsList)
         Spacer(modifier = Modifier.height(24.dp))
 
         character.origin?.name?.let {

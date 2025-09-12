@@ -2,6 +2,9 @@ package com.vladabur.wubbalubba.data.network.models
 
 import com.google.gson.annotations.SerializedName
 import com.vladabur.wubbalubba.domain.models.Character
+import com.vladabur.wubbalubba.domain.models.CharacterGender
+import com.vladabur.wubbalubba.domain.models.CharacterSpecies
+import com.vladabur.wubbalubba.domain.models.CharacterStatus
 import com.vladabur.wubbalubba.domain.models.ModelMapper
 import java.util.Date
 
@@ -34,10 +37,10 @@ data class CharacterResponse(
         override fun map(model: CharacterResponse): Character = Character(
             id = model.id,
             name = model.name,
-            status = model.status,
-            species = model.species,
+            status = model.status?.let { CharacterStatus.fromValue(it) },
+            species = model.species?.let { CharacterSpecies.fromValue(it) },
             type = model.type,
-            gender = model.gender,
+            gender = model.gender?.let { CharacterGender.fromValue(it) },
             origin = model.origin?.let { LocationResponse.map(it) },
             location = model.location?.let { LocationResponse.map(it) },
             image = model.image,
