@@ -20,20 +20,24 @@ class GetCharactersUseCase @Inject constructor(private val characterRepository: 
             //FIXME just to sow longer loading
             delay(1000)
             characterRepository.getCharactersList(
-                params!!.page,
+                params!!.isFromLocal,
+                params.isForceReload,
+                params.page,
                 params.name,
-                params.statuses,
+                params.status,
                 params.species,
-                params.genders
+                params.gender
             )
         }
     }
 
     class Params(
+        val isFromLocal: Boolean,
+        val isForceReload: Boolean,
         val page: Int,
         val name: String? = null,
-        val statuses: List<CharacterStatus>? = null,
-        val species: List<CharacterSpecies>? = null,
-        val genders: List<CharacterGender>? = null,
+        val status: CharacterStatus? = null,
+        val species: CharacterSpecies? = null,
+        val gender: CharacterGender? = null,
     )
 }
