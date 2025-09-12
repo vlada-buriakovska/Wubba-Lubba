@@ -39,7 +39,7 @@ fun ConnectionError(onRetry: () -> Unit, modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_sad_rick),
+                painter = painterResource(id = R.drawable.ic_morty),
                 contentDescription = stringResource(R.string.all_no_connection)
             )
             Spacer(modifier = Modifier.height(8.dp))

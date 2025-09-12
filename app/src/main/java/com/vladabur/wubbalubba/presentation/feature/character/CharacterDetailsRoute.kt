@@ -7,23 +7,27 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons.AutoMirrored
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -31,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -69,6 +74,7 @@ fun CharacterDetailsRoute(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CharacterDetailsScreen(
     uiState: CharacterDetailsUiState,
@@ -84,95 +90,96 @@ fun CharacterDetailsScreen(
             if (isContentLoading) {
                 PageLoadingSkeleton()
             } else {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    Box {
-                        AsyncImage(
-                            model = uiState.character?.image,
-                            contentDescription = uiState.character?.name,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .aspectRatio(1f)
+                Column {
+                    TopAppBar(
+                        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                        title = {},
+                        navigationIcon = {
+                            IconButton(onClick = onUpClicked) {
+                                Icon(
+                                    imageVector = AutoMirrored.Default.ArrowBack,
+                                    contentDescription = stringResource(R.string.all_back)
+                                )
+                            }
+                        },
+                        windowInsets = TopAppBarDefaults.windowInsets.only(WindowInsetsSides.Horizontal)
+                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        Box {
+                            AsyncImage(
+                                model = uiState.character?.image,
+                                contentDescription = uiState.character?.name,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .aspectRatio(1f)
+                            )
+                        }
+
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            uiState.character?.name?.let {
+                                Text(
+                                    text = it,
+                                    style = AppTypography.titleLarge
+                                )
+                            }
+                            uiState.character?.created?.let {
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = it.getFullDate(),
+                                    style = AppTypography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        val tabsList = listOf(
+                            stringResource(R.string.character_details_title),
+                            stringResource(R.string.character_details_episodes_title)
                         )
-                        IconButton(
+
+                        // Tabs
+                        TabRow(
+                            selectedTabIndex = selectedTabIndex,
                             modifier = Modifier
-                                .padding(16.dp)
-                                .clip(shape = CircleShape)
-                                .background(color = MaterialTheme.colorScheme.surface),
-                            onClick = {
-                                onUpClicked()
+                                .padding(vertical = 4.dp, horizontal = 8.dp)
+                                .clip(RoundedCornerShape(50))
+                                .padding(1.dp),
+                            indicator = {
+                                Box { }
                             }
                         ) {
-                            Icon(
-                                imageVector = AutoMirrored.Default.ArrowBack,
-                                contentDescription = stringResource(R.string.all_back),
-                            )
-                        }
-                    }
+                            tabsList.forEachIndexed { index, text ->
+                                val selected = selectedTabIndex == index
+                                val backgroundColor = if (selected)
+                                    MaterialTheme.colorScheme.primary
+                                else
+                                    MaterialTheme.colorScheme.surface
+                                val contentColor = if (selected)
+                                    MaterialTheme.colorScheme.onPrimary
+                                else
+                                    MaterialTheme.colorScheme.onSurface
 
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        uiState.character?.name?.let {
-                            Text(
-                                text = it,
-                                style = AppTypography.titleLarge
-                            )
+                                Tab(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(50))
+                                        .background(
+                                            backgroundColor
+                                        ),
+                                    selected = selected,
+                                    onClick = { selectedTabIndex = index },
+                                    text = { Text(text = text, color = contentColor) }
+                                )
+                            }
                         }
-                        uiState.character?.created?.let {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = it.getFullDate(),
-                                style = AppTypography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                    val tabsList = listOf(
-                        stringResource(R.string.character_details_title),
-                        stringResource(R.string.character_details_episodes_title)
-                    )
-
-                    // Tabs
-                    TabRow(
-                        selectedTabIndex = selectedTabIndex,
-                        modifier = Modifier
-                            .padding(vertical = 4.dp, horizontal = 8.dp)
-                            .clip(RoundedCornerShape(50))
-                            .padding(1.dp),
-                        indicator = {
-                            Box { }
-                        }
-                    ) {
-                        tabsList.forEachIndexed { index, text ->
-                            val selected = selectedTabIndex == index
-                            val backgroundColor = if (selected)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.surface
-                            val contentColor = if (selected)
-                                MaterialTheme.colorScheme.onPrimary
-                            else
-                                MaterialTheme.colorScheme.onSurface
-
-                            Tab(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(50))
-                                    .background(
-                                        backgroundColor
-                                    ),
-                                selected = selected,
-                                onClick = { selectedTabIndex = index },
-                                text = { Text(text = text, color = contentColor) }
-                            )
-                        }
-                    }
-                    uiState.character?.let {
-                        when (selectedTabIndex) {
-                            0 -> InformationTabContent(it)
-                            1 -> EpisodesTabContent(it)
+                        uiState.character?.let {
+                            when (selectedTabIndex) {
+                                0 -> InformationTabContent(it)
+                                1 -> EpisodesTabContent(it)
+                            }
                         }
                     }
                 }
